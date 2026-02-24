@@ -12,7 +12,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/adapter/adapter.dart';
 import 'package:socket_io/src/client.dart';
-import 'package:socket_io_common/src/parser/parser.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io/src/server.dart';
 import 'package:socket_io/src/socket.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
@@ -83,7 +83,7 @@ class Namespace extends EventEmitter {
       int index, List<Function> fns, Socket socket, Function fn) {
     return fns[index](socket, (err) {
       // upon error, short-circuit
-      if (err) return fn(err);
+      if (err != null) return fn(err);
 
       // if no middleware left, summon callback
       if (fns.length <= index + 1) return fn(null);
@@ -125,7 +125,7 @@ class Namespace extends EventEmitter {
       // don't use Timer.run() here
       scheduleMicrotask(() {
         if ('open' == client.conn.readyState) {
-          if (err != null) return socket.error(err.data || err.message);
+          if (err != null) return socket.error(err.data ?? err.message);
 
           // track socket
           self.sockets.add(socket);

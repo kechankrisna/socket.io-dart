@@ -14,10 +14,8 @@ import 'package:logging/logging.dart';
 import 'package:socket_io/src/client.dart';
 import 'package:socket_io/src/engine/engine.dart';
 import 'package:socket_io/src/namespace.dart';
-import 'package:socket_io_common/src/parser/parser.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:stream/stream.dart';
-
-import 'namespace.dart';
 
 /// Socket.IO client source.
 /// Old settings for backwards compatibility
@@ -140,7 +138,7 @@ class Server {
     if ('authorization' == key && val != null) {
       use((socket, next) {
         val(socket.request, (err, authorized) {
-          if (err) {
+          if (err != null) {
             return next(Exception(err));
           }
           ;
@@ -155,7 +153,7 @@ class Server {
       origins(val);
     } else if ('resource' == key) {
       path(val);
-    } else if (oldSettings[key] && engine![oldSettings[key]]) {
+    } else if (oldSettings[key] != null && engine![oldSettings[key]] != null) {
       engine![oldSettings[key]] = val;
     } else {
       _logger.severe('Option $key is not valid. Please refer to the README.');
@@ -254,50 +252,37 @@ class Server {
 ////                    response.close();
 ////                });
 
-      var completer = Completer();
       var connectPacket = {'type': CONNECT, 'nsp': '/'};
-      encoder.encode(connectPacket, (encodedPacket) {
-        // the CONNECT packet will be merged with Engine.IO handshake,
-        // to reduce the number of round trips
-        opts!['initialPacket'] = encodedPacket;
+      // the CONNECT packet will be merged with Engine.IO handshake,
+      // to reduce the number of round trips
+      opts['initialPacket'] = encoder.encode(connectPacket);
 
-        _logger.fine('creating engine.io instance with opts $opts');
-        // initialize engine
-        engine = Engine.attach(server, opts);
+      _logger.fine('creating engine.io instance with opts $opts');
+      // initialize engine
+      engine = Engine.attach(server, opts);
 
-        // attach static file serving
-//        if (self._serveClient) self.attachServe(srv);
+      // Export http server
+      httpServer = server;
 
-        // Export http server
-        httpServer = server;
+      // bind to engine events
+      bind(engine!);
 
-        // bind to engine events
-        bind(engine!);
-
-        completer.complete();
-      });
-      await completer.future;
-//      });
     } else {
       var connectPacket = {'type': CONNECT, 'nsp': '/'};
-      encoder.encode(connectPacket, (encodedPacket) {
-        // the CONNECT packet will be merged with Engine.IO handshake,
-        // to reduce the number of round trips
-        opts!['initialPacket'] = encodedPacket;
+      // the CONNECT packet will be merged with Engine.IO handshake,
+      // to reduce the number of round trips
+      opts['initialPacket'] = encoder.encode(connectPacket);
 
-        _logger.fine('creating engine.io instance with opts $opts');
-        // initialize engine
-        engine = Engine.attach(srv, opts);
+      _logger.fine('creating engine.io instance with opts $opts');
+      // initialize engine
+      engine = Engine.attach(srv, opts);
 
-        // attach static file serving
-//        if (self._serveClient) self.attachServe(srv);
+      // Export http server
+      httpServer = srv;
 
-        // Export http server
-        httpServer = srv;
+      // bind to engine events
+      bind(engine!);
 
-        // bind to engine events
-        bind(engine!);
-      });
     }
 
     return this;

@@ -11,7 +11,7 @@
 import 'package:logging/logging.dart';
 
 import 'package:socket_io/src/engine/socket.dart';
-import 'package:socket_io_common/src/parser/parser.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io/src/server.dart';
 
 class Client {
@@ -55,7 +55,7 @@ class Client {
     _logger.fine('connecting to namespace $name');
     if (!server.nsps.containsKey(name)) {
       packet(<dynamic, dynamic>{
-        'type': ERROR,
+        'type': CONNECT_ERROR,
         'nsp': name,
         'data': 'Invalid namespace'
       });
@@ -140,10 +140,7 @@ class Client {
       _logger.fine('writing packet $packet');
       if (opts['preEncoded'] != true) {
         // not broadcasting, need to encode
-        encoder.encode(packet, (encodedPackets) {
-          // encode, then write results to engine
-          writeToEngine(encodedPackets);
-        });
+        writeToEngine(encoder.encode(packet));
       } else {
         // a broadcast pre-encodes a packet
         writeToEngine(packet);

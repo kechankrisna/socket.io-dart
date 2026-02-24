@@ -314,10 +314,8 @@ class Socket extends EventEmitter {
     var onDrain = (_) {
       if (sentCallbackFn.isNotEmpty) {
         var seqFn = sentCallbackFn[0];
-        if (seqFn is Function) {
-          _logger.fine('executing send callback');
-          seqFn(transport);
-        }
+        _logger.fine('executing send callback');
+        seqFn(transport);
 
         /// else if (Array.isArray(seqFn)) {
         /// _logger.fine('executing batch send callback');

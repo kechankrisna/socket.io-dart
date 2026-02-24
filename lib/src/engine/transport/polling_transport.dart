@@ -13,7 +13,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/engine/connect.dart';
-import 'package:socket_io_common/src/engine/parser/parser.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
 class PollingTransport extends Transport {
@@ -136,7 +136,8 @@ class PollingTransport extends Transport {
         contentLength = chunks.length;
       }
 
-      if (contentLength > self.maxHttpBufferSize) {
+      if (self.maxHttpBufferSize != null &&
+          contentLength > self.maxHttpBufferSize!) {
         chunks = '';
         connect.close();
       }
@@ -180,18 +181,15 @@ class PollingTransport extends Transport {
       messageHandler!.handle(this, data);
     } else {
       var self = this;
-      var callback = (packet, [foo, bar]) {
+      var packets = PacketParser.decodePayload(data, null);
+      for (var packet in (packets is List ? packets : [packets])) {
         if ('close' == packet['type']) {
           _logger.fine('got xhr close packet');
           self.onClose();
-          return false;
+          break;
         }
-
-        self.onPacket(packet);
-        return true;
-      };
-
-      PacketParser.decodePayload(data, callback: callback);
+        self.onPacket(packet as Map);
+      }
     }
   }
 
@@ -225,7 +223,7 @@ class PollingTransport extends Transport {
     }
 
     var self = this;
-    PacketParser.encodePayload(packets, supportsBinary: supportsBinary == true,
+    PacketParser.encodePayload(packets,
         callback: (data) {
       var compress = packets.any((packet) {
         var opt = packet['options'];

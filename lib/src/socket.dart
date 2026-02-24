@@ -11,7 +11,7 @@
 import 'dart:io';
 import 'package:socket_io/src/adapter/adapter.dart';
 import 'package:socket_io/src/client.dart';
-import 'package:socket_io_common/src/parser/parser.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io/src/server.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
@@ -297,7 +297,7 @@ class Socket extends EventEmitter {
         ondisconnect();
         break;
 
-      case ERROR:
+      case CONNECT_ERROR:
         emit('error', packet['data']);
     }
   }
@@ -349,10 +349,10 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void onack(packet) {
-    Function ack = acks.remove(packet['id']);
-    if (ack is Function) {
+    dynamic ackFn = acks.remove(packet['id']);
+    if (ackFn is Function) {
 //      debug('calling ack %s with %j', packet.id, packet.data);
-      Function.apply(ack, packet['data']);
+      Function.apply(ackFn, packet['data']);
     } else {
 //      debug('bad ack %s', packet.id);
     }
@@ -401,7 +401,7 @@ class Socket extends EventEmitter {
   /// @param {Object} error object
   /// @api private
   void error(err) {
-    packet(<dynamic, dynamic>{'type': ERROR, 'data': err});
+    packet(<dynamic, dynamic>{'type': CONNECT_ERROR, 'data': err});
   }
 
   /// Disconnects this client.

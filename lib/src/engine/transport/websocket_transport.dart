@@ -11,7 +11,7 @@ import 'dart:async';
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
-import 'package:socket_io_common/src/engine/parser/parser.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
 class WebSocketTransport extends Transport {
@@ -60,7 +60,8 @@ class WebSocketTransport extends Transport {
     for (var i = 0; i < packets.length; i++) {
       var packet = packets[i];
       PacketParser.encodePacket(packet,
-          supportsBinary: supportsBinary, callback: (_) => send(_, packet));
+          supportsBinary: supportsBinary ?? false,
+          callback: (_) => send(_, packet));
     }
   }
 

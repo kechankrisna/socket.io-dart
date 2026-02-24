@@ -10,7 +10,7 @@
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
 import 'package:socket_io/src/namespace.dart';
-import 'package:socket_io_common/src/parser/parser.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
 
 abstract class Adapter {
@@ -128,8 +128,8 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     var socket;
 
     packet['nsp'] = nsp.name;
-    encoder.encode(packet, (encodedPackets) {
-      if (rooms.isNotEmpty) {
+    var encodedPackets = encoder.encode(packet);
+    if (rooms.isNotEmpty) {
         for (var i = 0; i < rooms.length; i++) {
           var room = this.rooms[rooms[i]];
           if (room == null) continue;
@@ -146,17 +146,14 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
           }
         }
       } else {
-        for (var id in sids.keys) {
-          if (except.contains(id)) continue;
-          socket = nsp.connected[id];
-          if (socket != null) socket.packet(encodedPackets, packetOpts);
-        }
+      for (var id in sids.keys) {
+        if (except.contains(id)) continue;
+        socket = nsp.connected[id];
+        if (socket != null) socket.packet(encodedPackets, packetOpts);
       }
-    });
+    }
   }
 
-  /// Gets a list of clients by sid.
-  ///
   /// @param {Array} explicit set of rooms to check.
   /// @param {Function} callback
   /// @api public

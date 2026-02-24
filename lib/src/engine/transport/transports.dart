@@ -10,7 +10,7 @@
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/engine/connect.dart';
-import 'package:socket_io_common/src/engine/parser/parser.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io/src/engine/transport/jsonp_transport.dart';
 import 'package:socket_io/src/engine/transport/websocket_transport.dart';
 import 'package:socket_io/src/engine/transport/xhr_transport.dart';
@@ -95,7 +95,7 @@ abstract class Transport extends EventEmitter {
     if (messageHandler != null) {
       messageHandler!.handle(this, data);
     } else {
-      onPacket(PacketParser.decodePacket(data, utf8decode: true));
+      onPacket(PacketParser.decodePacket(data, null) as Map);
     }
   }
 

@@ -428,9 +428,9 @@ class Server extends Engine {
   static void abortConnection(SocketConnect connect, code) {
     var socket = connect.websocket;
     if (socket?.readyState == HttpStatus.ok) {
-      var message = ServerErrorMessages.containsKey(code)
-          ? ServerErrorMessages[code]
-          : code;
+      final String message = ServerErrorMessages.containsKey(code)
+          ? (ServerErrorMessages[code] ?? '')
+          : '$code';
       var length = utf8.encode(message).length;
       socket!.add('HTTP/1.1 400 Bad Request\r\n'
               'Connection: close\r\n'

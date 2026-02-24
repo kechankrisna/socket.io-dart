@@ -16,12 +16,12 @@ typedef EventHandler<T> = dynamic Function(T data);
 /// Generic event emitting and handling.
 class EventEmitter {
   /// Mapping of events to a list of event handlers
-  Map<String, List<EventHandler>> _events =
-      HashMap<String, List<EventHandler>>();
+  Map<String, List<Function>> _events =
+      HashMap<String, List<Function>>();
 
   /// Mapping of events to a list of one-time event handlers
-  Map<String, List<EventHandler>> _eventsOnce =
-      HashMap<String, List<EventHandler>>();
+  Map<String, List<Function>> _eventsOnce =
+      HashMap<String, List<Function>>();
 
   /// This function triggers all the handlers currently listening
   /// to [event] and passes them [data].
@@ -29,32 +29,32 @@ class EventEmitter {
     final list0 = _events[event];
     // todo: try to optimize this. Maybe remember the off() handlers and remove later?
     // handler might be off() inside handler; make a copy first
-    final list = list0 != null ? List.from(list0) : null;
+    final list = list0 != null ? List<Function>.from(list0) : null;
     list?.forEach((handler) {
       handler(data);
     });
 
-    _eventsOnce.remove(event)?.forEach((EventHandler handler) {
+    _eventsOnce.remove(event)?.forEach((Function handler) {
       handler(data);
     });
   }
 
   /// This function binds the [handler] as a listener to the [event]
-  void on(String event, EventHandler handler) {
-    _events.putIfAbsent(event, () => <EventHandler>[]);
+  void on<T>(String event, EventHandler<T> handler) {
+    _events.putIfAbsent(event, () => <Function>[]);
     _events[event]!.add(handler);
   }
 
   /// This function binds the [handler] as a listener to the first
   /// occurrence of the [event]. When [handler] is called once,
   /// it is removed.
-  void once(String event, EventHandler handler) {
-    _eventsOnce.putIfAbsent(event, () => <EventHandler>[]);
+  void once<T>(String event, EventHandler<T> handler) {
+    _eventsOnce.putIfAbsent(event, () => <Function>[]);
     _eventsOnce[event]!.add(handler);
   }
 
   /// This function attempts to unbind the [handler] from the [event]
-  void off(String event, [EventHandler? handler]) {
+  void off(String event, [Function? handler]) {
     if (handler != null) {
       _events[event]?.remove(handler);
       _eventsOnce[event]?.remove(handler);
@@ -72,8 +72,8 @@ class EventEmitter {
 
   /// This function unbinds all the handlers for all the events.
   void clearListeners() {
-    _events = HashMap<String, List<EventHandler>>();
-    _eventsOnce = HashMap<String, List<EventHandler>>();
+    _events = HashMap<String, List<Function>>();
+    _eventsOnce = HashMap<String, List<Function>>();
   }
 
   /// Returns whether the event has registered.
