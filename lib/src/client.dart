@@ -10,9 +10,9 @@
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 
-import 'package:socket_io/src/engine/socket.dart';
+import 'package:socket_io_plus/src/engine/socket.dart';
 import 'package:socket_io_common/socket_io_common.dart';
-import 'package:socket_io/src/server.dart';
+import 'package:socket_io_plus/src/server.dart';
 
 class Client {
   Server server;

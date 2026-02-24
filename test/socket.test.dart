@@ -10,7 +10,7 @@
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:test/test.dart';
 
-import 'package:socket_io/socket_io.dart';
+import 'package:socket_io_plus/socket_io.dart';
 
 void main() {
   group('Socket IO', () {

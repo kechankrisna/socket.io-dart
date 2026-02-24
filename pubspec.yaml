@@ -1,11 +1,9 @@
-name: socket_io
+name: socket_io_plus
 description: >
   Port of JS/Node library Socket.io. It enables real-time, bidirectional and 
-  event-based communication cross-platform.
+  event-based communication cross-platform. Dart 3 compatible fork.
 version: 2.0.0
-homepage: https://www.zkoss.org
-repository: https://github.com/rikulo/socket.io-dart
-issue_tracker: https://github.com/rikulo/socket.io-dart/issues
+homepage: https://pub.dev/packages/socket_io_plus
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

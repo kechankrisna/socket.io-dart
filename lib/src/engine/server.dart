@@ -11,10 +11,10 @@
 import 'dart:convert';
 import 'dart:io' hide Socket;
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/engine/connect.dart';
-import 'package:socket_io/src/engine/engine.dart';
-import 'package:socket_io/src/engine/socket.dart';
-import 'package:socket_io/src/engine/transport/transports.dart';
+import 'package:socket_io_plus/src/engine/connect.dart';
+import 'package:socket_io_plus/src/engine/engine.dart';
+import 'package:socket_io_plus/src/engine/socket.dart';
+import 'package:socket_io_plus/src/engine/transport/transports.dart';
 import 'package:stream/stream.dart';
 import 'package:uuid/uuid.dart';
 

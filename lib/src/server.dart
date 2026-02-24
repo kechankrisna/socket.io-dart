@@ -11,9 +11,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/client.dart';
-import 'package:socket_io/src/engine/engine.dart';
-import 'package:socket_io/src/namespace.dart';
+import 'package:socket_io_plus/src/client.dart';
+import 'package:socket_io_plus/src/engine/engine.dart';
+import 'package:socket_io_plus/src/namespace.dart';
 import 'package:socket_io_common/socket_io_common.dart';
 import 'package:stream/stream.dart';
 

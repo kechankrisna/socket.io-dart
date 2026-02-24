@@ -12,10 +12,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/engine/connect.dart';
-import 'package:socket_io/src/engine/server.dart';
-import 'package:socket_io/src/engine/transport/transports.dart';
-import 'package:socket_io/src/util/event_emitter.dart';
+import 'package:socket_io_plus/src/engine/connect.dart';
+import 'package:socket_io_plus/src/engine/server.dart';
+import 'package:socket_io_plus/src/engine/transport/transports.dart';
+import 'package:socket_io_plus/src/util/event_emitter.dart';
 
 /// Client class (abstract).
 ///

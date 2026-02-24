@@ -9,12 +9,12 @@
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/engine/connect.dart';
+import 'package:socket_io_plus/src/engine/connect.dart';
 import 'package:socket_io_common/socket_io_common.dart';
-import 'package:socket_io/src/engine/transport/jsonp_transport.dart';
-import 'package:socket_io/src/engine/transport/websocket_transport.dart';
-import 'package:socket_io/src/engine/transport/xhr_transport.dart';
-import 'package:socket_io/src/util/event_emitter.dart';
+import 'package:socket_io_plus/src/engine/transport/jsonp_transport.dart';
+import 'package:socket_io_plus/src/engine/transport/websocket_transport.dart';
+import 'package:socket_io_plus/src/engine/transport/xhr_transport.dart';
+import 'package:socket_io_plus/src/util/event_emitter.dart';
 
 class Transports {
   static List<String> upgradesTo(String from) {
