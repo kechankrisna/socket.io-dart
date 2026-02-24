@@ -1,96 +1,190 @@
-# socket.io-dart
+# socket_io_plus
 
-Port of awesome JavaScript Node.js library - [Socket.io v2.0.1](https://github.com/socketio/socket.io) - in Dart
+A Dart 3 compatible port of the [Socket.IO](https://socket.io) server library.  
+Real-time, bidirectional, event-based communication — fully null-safe and ready for modern Dart.
 
-## Usage
+[![pub package](https://img.shields.io/pub/v/socket_io_plus.svg)](https://pub.dev/packages/socket_io_plus)
+[![Dart SDK](https://img.shields.io/badge/Dart-%3E%3D3.0.0-blue)](https://dart.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+---
+
+## Features
+
+- Full Dart 3 null-safety support
+- WebSocket and XHR/JSONP polling transports
+- Namespace (multiplexing) support
+- Room-based broadcasting
+- In-memory socket adapter
+- Compatible with the official [socket_io_client](https://pub.dev/packages/socket_io_client) and JS Socket.IO clients
+
+---
+
+## Installation
+
+Add to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  socket_io_plus: ^2.0.0
+```
+
+Then run:
+
+```sh
+dart pub get
+```
+
+---
+
+## Quick Start
+
+### Server (Dart)
 
 ```dart
 import 'package:socket_io_plus/socket_io.dart';
 
-main() {
-    var io = new Server();
-    var nsp = io.of('/some');
-    nsp.on('connection', (client) {
-      print('connection /some');
-      client.on('msg', (data) {
-        print('data from /some => $data');
-        client.emit('fromServer', "ok 2");
-      });
+void main() async {
+  final io = Server();
+
+  // Default namespace
+  io.on('connection', (Socket client) {
+    print('Client connected: ${client.id}');
+
+    client.on('msg', (data) {
+      print('Message from client: $data');
+      client.emit('fromServer', 'ok');
     });
-      io.on('connection', (client) {
-        print('connection default namespace');
-        client.on('msg', (data) {
-          print('data from default => $data');
-          client.emit('fromServer', "ok");
-        });
-      });
-      io.listen(3000);
+
+    client.on('disconnect', (_) {
+      print('Client disconnected: ${client.id}');
+    });
+  });
+
+  // Custom namespace
+  final nsp = io.of('/chat');
+  nsp.on('connection', (Socket client) {
+    print('Client connected to /chat');
+
+    client.on('message', (data) {
+      // Broadcast to everyone in the namespace
+      nsp.emit('broadcastMessage', data);
+    });
+  });
+
+  await io.listen(3000);
+  print('Server running on port 3000');
 }
 ```
 
+### Client — JavaScript
+
 ```js
-// JS client
-var socket = io('http://localhost:3000');
-socket.on('connect', function(){console.log('connect')});
-socket.on('event', function(data){console.log(data)});
-socket.on('disconnect', function(){console.log('disconnect')});
-socket.on('fromServer', function(e){console.log(e)});
+const socket = io('http://localhost:3000');
+
+socket.on('connect', () => console.log('connected'));
+socket.on('fromServer', (data) => console.log('from server:', data));
+socket.on('disconnect', () => console.log('disconnected'));
+
+socket.emit('msg', 'hello');
 ```
+
+### Client — Dart
 
 ```dart
-// Dart client
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-IO.Socket socket = IO.io('http://localhost:3000');
-socket.on('connect', (_) {
-  print('connect');
-  socket.emit('msg', 'test');
-});
-socket.on('event', (data) => print(data));
-socket.on('disconnect', (_) => print('disconnect'));
-socket.on('fromServer', (_) => print(_));
+void main() {
+  final socket = IO.io('http://localhost:3000');
+
+  socket.on('connect', (_) {
+    print('connected');
+    socket.emit('msg', 'hello from Dart');
+  });
+
+  socket.on('fromServer', (data) => print('from server: $data'));
+  socket.on('disconnect', (_) => print('disconnected'));
+}
 ```
 
-## Multiplexing support
+---
 
-Same as Socket.IO, this project allows you to create several Namespaces, which will act as separate communication channels but will share the same underlying connection.
+## Rooms
 
-## Room support
+Sockets can join and leave named rooms. Broadcast to all members of a room:
 
-Within each Namespace, you can define arbitrary channels, called Rooms, that sockets can join and leave. You can then broadcast to any given room, reaching every socket that has joined it.
+```dart
+io.on('connection', (Socket client) {
+  client.join('room1');
 
-## Transports support
- Refers to [engine.io](https://github.com/socketio/engine.io)
+  client.on('msg', (data) {
+    // Emit to all sockets in 'room1'
+    io.to('room1').emit('roomMessage', data);
+  });
+});
+```
 
-- `polling`: XHR / JSONP polling transport.
-- `websocket`: WebSocket transport.
+---
 
-## Adapters support
+## Namespaces
 
-*  Default socket.io in-memory adapter class. Refers to [socket.io-adapter](https://github.com/socketio/socket.io-adapter)
+Create separate communication channels that share the same underlying connection:
 
-## Notes to Contributors
+```dart
+final admin = io.of('/admin');
+admin.on('connection', (Socket client) {
+  client.emit('welcome', 'You are in the admin namespace');
+});
+```
 
-### Fork socket.io-dart
+---
 
-If you'd like to contribute back to the core, you can [fork this repository](https://help.github.com/articles/fork-a-repo) and send us a pull request, when it is ready.
+## Transports
 
-If you are new to Git or GitHub, please read [this guide](https://help.github.com/) first.
+Powered by Engine.IO, two transports are supported:
 
-## Who Uses
+| Transport   | Description                                    |
+|-------------|------------------------------------------------|
+| `polling`   | XHR / JSONP long-polling (HTTP fallback)       |
+| `websocket` | Full-duplex WebSocket connection               |
 
-* [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
-* [KEIKAI](https://keikai.io/) - a web spreadsheet for Big Data.
+Clients start with polling and upgrade to WebSocket automatically when available.
 
-## Socket.io Dart Client
+---
 
-* [socket.io-client-dart](https://github.com/rikulo/socket.io-client-dart)
+## Migration from `socket_io`
 
-## Contributors
-* Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-dart/issues/7
-* Thanks [@ThinkDigitalSoftware](https://github.com/ThinkDigitalSoftware) for https://github.com/rikulo/socket.io-dart/pull/15
-* Thanks [@guilhermecaldas](https://github.com/guilhermecaldas) for https://github.com/rikulo/socket.io-dart/pull/16
-* Thanks [@jodinathan](https://github.com/jodinathan) for https://github.com/rikulo/socket.io-dart/pull/17
-* Thanks [@jodinathan](https://github.com/jodinathan) for https://github.com/rikulo/socket.io-dart/pull/18
-* Thanks [@nicobritos](https://github.com/nicobritos) for https://github.com/rikulo/socket.io-dart/pull/46
-* Thanks [@nicobritos](https://github.com/nicobritos) for https://github.com/rikulo/socket.io-dart/pull/47
+This package is a Dart 3 compatible fork of [`socket_io`](https://pub.dev/packages/socket_io). To migrate:
+
+1. Replace `socket_io` with `socket_io_plus` in `pubspec.yaml`
+2. Update all imports:
+
+```dart
+// Before
+import 'package:socket_io/socket_io.dart';
+
+// After
+import 'package:socket_io_plus/socket_io.dart';
+```
+
+No other code changes are required.
+
+---
+
+## Dart Client Package
+
+Use [`socket_io_client`](https://pub.dev/packages/socket_io_client) to connect a Dart client to this server.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+If you are new to Git or GitHub, read [this guide](https://help.github.com/) first.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
