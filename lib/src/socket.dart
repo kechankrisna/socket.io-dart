@@ -266,7 +266,10 @@ class Socket extends EventEmitter {
 //    debug('socket connected - writing packet');
     nsp.connected[id] = this;
     join(id);
-    packet(<dynamic, dynamic>{'type': CONNECT});
+    // Socket.IO v3+ protocol requires CONNECT response to include {sid} in
+    // data so the client can confirm the namespace is joined. Without it,
+    // socket_io_client v3.x emits a connect_error and never fires onConnect.
+    packet(<dynamic, dynamic>{'type': CONNECT, 'data': {'sid': id}});
   }
 
   /// Called with each packet. Called by `Client`.
