@@ -1,4 +1,9 @@
+## 2.0.0+1
+* fixed on connect 
+
 ## 2.0.0
+
+* support dart 3.0.0
 
 **Breaking Changes — Dart 3 upgrade:**
 
